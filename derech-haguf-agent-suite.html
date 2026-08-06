@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז הסוכנים — דרך הגוף</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#1B4B43;
+    --forest-dark:#12332D;
+    --sand:#EFE7D8;
+    --clay:#B8552F;
+    --clay-light:#D97A50;
+    --ink:#20241F;
+    --paper:#FAF7F1;
+    --line: rgba(27,75,67,0.15);
+    --ok:#2E7D5B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Assistant', sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  header{
+    background:var(--forest);
+    color:var(--sand);
+    padding:22px 20px 18px;
+  }
+  header h1{
+    font-family:'Frank Ruhl Libre', serif;
+    font-size:24px;
+    margin:0 0 2px;
+  }
+  header p{margin:0;font-size:13.5px;opacity:.75;}
+
+  nav{
+    display:flex;
+    overflow-x:auto;
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    position:sticky;
+    top:0;
+    z-index:10;
+  }
+  nav button{
+    flex:0 0 auto;
+    padding:14px 14px;
+    background:none;
+    border:none;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    color:#8a8f85;
+    cursor:pointer;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+  }
+  nav button.active{
+    color:var(--forest-dark);
+    border-bottom-color:var(--clay);
+  }
+
+  main{
+    max-width:640px;
+    margin:0 auto;
+    padding:20px 16px 80px;
+  }
+  .tab{display:none;}
+  .tab.active{display:block;}
+
+  .empty{
+    text-align:center;
+    color:#8a8f85;
+    padding:40px 20px;
+    font-size:14.5px;
+  }
+
+  .card{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+  .card .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:6px;
+  }
+  .card .name{font-weight:700;font-size:15.5px;color:var(--forest-dark);}
+  .card .meta{font-size:12.5px;color:#8a8f85;margin-top:2px;}
+  .card .tagline{font-size:12.5px;color:var(--clay);font-weight:700;background:rgba(184,85,47,.08);padding:3px 9px;border-radius:100px;white-space:nowrap;}
+
+  .draft-box{
+    margin-top:10px;
+    border-top:1px dashed var(--line);
+    padding-top:10px;
+  }
+  .draft-box textarea{
+    width:100%;
+    min-height:90px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px;
+    font-family:inherit;
+    font-size:13.5px;
+    resize:vertical;
+    background:var(--paper);
+  }
+  .row-actions{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    border:none;
+    border-radius:9px;
+    padding:9px 14px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--forest);color:#fff;}
+  .btn-clay{background:var(--clay);color:#fff;}
+  .btn-ghost{background:var(--sand);color:var(--forest-dark);}
+  .btn:disabled{opacity:.5;cursor:default;}
+  a.btn{text-decoration:none;display:inline-flex;align-items:center;}
+
+  .add-lead-form{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:18px;
+  }
+  .add-lead-form h3{margin:0 0 10px;font-size:15px;font-family:'Frank Ruhl Libre',serif;color:var(--forest-dark);}
+  .add-lead-form input, .add-lead-form textarea{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:9px 12px;
+    font-family:inherit;
+    font-size:13.5px;
+    margin-bottom:8px;
+    background:var(--paper);
+  }
+  .add-lead-form textarea{min-height:60px;resize:vertical;}
+
+  .section-label{
+    font-size:12.5px;
+    font-weight:700;
+    color:#8a8f85;
+    margin:4px 2px 10px;
+  }
+  .chart-block{margin-bottom:20px;}
+  .chart-block h4{
+    font-family:'Frank Ruhl Libre',serif;
+    font-size:14px;
+    color:var(--forest-dark);
+    margin:0 0 10px;
+  }
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .bar-row .bar-label{width:56px;font-size:11.5px;color:#565b52;flex-shrink:0;text-align:left;}
+  .bar-row .bar-track{flex:1;background:var(--sand);border-radius:100px;height:16px;overflow:hidden;}
+  .bar-row .bar-fill{height:100%;background:var(--forest);border-radius:100px;}
+  .bar-row .bar-val{width:22px;font-size:11px;font-weight:700;color:var(--forest-dark);text-align:right;}
+  .insight-box{
+    background:rgba(184,85,47,0.08);
+    border-radius:10px;
+    padding:12px 14px;
+    font-size:13px;
+    color:var(--forest-dark);
+    line-height:1.6;
+    margin-top:6px;
+  }
+  .spinner{
+    display:inline-block;width:13px;height:13px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
+    animation:spin .7s linear infinite;vertical-align:middle;margin-left:6px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>מרכז הסוכנים — דרך הגוף</h1>
+  <p>שלושה עוזרים אוטומטיים שמנסחים הודעות אישיות ומכינות אותן לשליחה בוואטסאפ בלחיצה אחת</p>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="reminders">תזכורות תורים</button>
+  <button class="tab-btn" data-tab="leads">מעקב לידים</button>
+  <button class="tab-btn" data-tab="reviews">ביקוש ביקורות</button>
+  <button class="tab-btn" data-tab="retention">שימור לקוחות</button>
+  <button class="tab-btn" data-tab="content">תוכן ורשתות</button>
+  <button class="tab-btn" data-tab="confirm">אישור הגעה</button>
+  <button class="tab-btn" data-tab="schedule">תזמון</button>
+  <button class="tab-btn" data-tab="report">דוח שבועי</button>
+</nav>
+
+<main>
+
+  <!-- ===== TAB 1: REMINDERS ===== -->
+  <section id="tab-reminders" class="tab active">
+    <div class="section-label">תורים קרובים מתוך יומן ההזמנות המשותף</div>
+    <div id="remindersList"><div class="empty">טוען...</div></div>
+  </section>
+
+  <!-- ===== TAB 2: LEADS ===== -->
+  <section id="tab-leads" class="tab">
+    <div class="add-lead-form">
+      <h3>הוספת ליד למעקב</h3>
+      <input id="leadName" placeholder="שם" />
+      <input id="leadPhone" placeholder="טלפון (בפורמט בינלאומי, לדוגמה 972501234567)" />
+      <textarea id="leadNote" placeholder="על מה דיברתם / למה עדיין לא סגר (לדוגמה: התעניין בשיקום ברך, אמר שיחשוב על זה)"></textarea>
+      <button class="btn btn-primary" id="addLeadBtn">➕ הוסף ליד</button>
+    </div>
+    <div class="section-label">לידים במעקב</div>
+    <div id="leadsList"><div class="empty">אין עדיין לידים. הוסיפו למעלה.</div></div>
+  </section>
+
+  <!-- ===== TAB 3: REVIEWS ===== -->
+  <section id="tab-reviews" class="tab">
+    <div class="section-label">לקוחות שכבר טופלו — כדאי לבקש ביקורת</div>
+    <div id="reviewsList"><div class="empty">טוען...</div></div>
+  </section>
+
+  <!-- ===== TAB 4: RETENTION ===== -->
+  <section id="tab-retention" class="tab">
+    <div class="section-label">לקוחות שלא חזרו כבר תקופה — כדאי "לחמם" לפני שהולכים למתחרה</div>
+    <div id="retentionList"><div class="empty">טוען...</div></div>
+  </section>
+
+  <!-- ===== TAB 5: CONTENT ===== -->
+  <section id="tab-content" class="tab">
+    <div class="section-label">רעיונות לפוסטים לרשתות, מבוססים על מה שקורה בעסק השבוע</div>
+    <div class="card">
+      <div class="row-actions">
+        <button class="btn btn-primary" id="genContentBtn">✍️ צור 3 רעיונות לפוסט</button>
+      </div>
+      <div id="contentResult"></div>
+    </div>
+  </section>
+
+  <!-- ===== TAB 6: CONFIRMATION / NO-SHOW RISK ===== -->
+  <section id="tab-confirm" class="tab">
+    <div class="section-label">תורים ב-48 השעות הקרובות — כדאי אישור הגעה מפורש כדי לצמצם no-show</div>
+    <div id="confirmList"><div class="empty">טוען...</div></div>
+  </section>
+
+  <!-- ===== TAB 7: SCHEDULING INSIGHTS ===== -->
+  <section id="tab-schedule" class="tab">
+    <div class="section-label">אילו שעות וימים הכי מבוקשים, לפי ההזמנות ביומן</div>
+    <div id="scheduleInsights"><div class="empty">טוען...</div></div>
+  </section>
+
+  <!-- ===== TAB 8: WEEKLY REPORT ===== -->
+  <section id="tab-report" class="tab">
+    <div class="section-label">תמונת מצב שבועית על סמך הנתונים האמיתיים ביומן</div>
+    <div class="card">
+      <div class="row-actions">
+        <button class="btn btn-primary" id="genReportBtn">📊 צור דוח שבועי</button>
+      </div>
+      <div id="reportResult"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+  const BUSINESS_PHONE_PLACEHOLDER = "972500000000"; // TODO: יוחלף אוטומטית מפרטי הלקוח אם קיימים
+  const GOOGLE_REVIEW_LINK = "https://g.page/r/REPLACE_ME/review"; // TODO: להחליף בקישור האמיתי לביקורות גוגל
+
+  // ---- tabs ----
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---- storage helpers ----
+  async function safeGet(key, shared){
+    try{
+      const r = await window.storage.get(key, shared);
+      return r ? JSON.parse(r.value) : null;
+    }catch(e){ return null; }
+  }
+  async function safeSet(key, value, shared){
+    try{ await window.storage.set(key, JSON.stringify(value), shared); }catch(e){}
+  }
+
+  async function getBookings(){
+    return (await safeGet('bookings-log', true)) || [];
+  }
+  async function getLeads(){
+    return (await safeGet('leads-log', true)) || [];
+  }
+  async function saveLeads(leads){
+    await safeSet('leads-log', leads, true);
+  }
+
+  // parse "יום X D/M בשעה H:00" into a JS Date (best-effort, assumes current/next year)
+  function parseSlotDate(label){
+    const m = label.match(/(\d{1,2})\/(\d{1,2})\s*בשעה\s*(\d{1,2}):00/);
+    if(!m) return null;
+    const [, d, mo, h] = m.map(Number);
+    const now = new Date();
+    let year = now.getFullYear();
+    let dt = new Date(year, mo-1, d, h, 0);
+    if(dt < now.setHours(0,0,0,0) - 86400000*3) dt.setFullYear(year+1); // rolled into next year
+    return dt;
+  }
+
+  async function callClaude(systemPrompt, userPrompt){
+    const response = await fetch("/.netlify/functions/claude", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: [{ role: "user", content: userPrompt }]
+      })
+    });
+    const data = await response.json();
+    const block = (data.content || []).find(b => b.type === 'text');
+    return block ? block.text.trim() : '';
+  }
+
+  function waLink(phone, text){
+    const p = (phone || BUSINESS_PHONE_PLACEHOLDER).replace(/\D/g,'');
+    return `https://wa.me/${p}?text=${encodeURIComponent(text)}`;
+  }
+
+  // ================= REMINDERS TAB =================
+  const REMINDER_SYS = `את "דנה" מ"דרך הגוף" בבאר שבע, סטודיו טיפולי-תנועתי. כתבי הודעת תזכורת קצרה וחמה
+לתור שנקבע, בעברית טבעית, עד 3 משפטים, עם שם הלקוח ומועד התור. סיימי במשפט שמעודד אישור הגעה
+או עדכון אם צריך לדחות. בלי אימוג'ים מוגזמים (עד אחד). אל תוסיפי כותרות או חתימה.`;
+
+  async function renderReminders(){
+    const bookings = await getBookings();
+    const now = new Date();
+    const upcoming = bookings
+      .map(b => ({ ...b, dateObj: parseSlotDate(b.slot) }))
+      .filter(b => b.dateObj && b.dateObj > now)
+      .sort((a,b) => a.dateObj - b.dateObj);
+
+    const el = document.getElementById('remindersList');
+    if(upcoming.length === 0){
+      el.innerHTML = '<div class="empty">אין כרגע תורים עתידיים ביומן. תורים שנקבעים דרך סוכן המכירות באתר יופיעו כאן אוטומטית.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    upcoming.forEach((b, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${b.name}</div>
+            <div class="meta">${b.slot} · ${b.phone}</div>
+          </div>
+          <div class="tagline">תור קרוב</div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary gen-btn">✍️ נסח תזכורת</button>
+        </div>
+        <div class="draft-box" style="display:none;">
+          <textarea class="draft-text"></textarea>
+          <div class="row-actions">
+            <a class="btn btn-clay send-wa" target="_blank">📲 פתח בוואטסאפ</a>
+          </div>
+        </div>
+      `;
+      const genBtn = card.querySelector('.gen-btn');
+      const draftBox = card.querySelector('.draft-box');
+      const textarea = card.querySelector('.draft-text');
+      const sendWa = card.querySelector('.send-wa');
+      genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        genBtn.innerHTML = 'מנסחת<span class="spinner"></span>';
+        const text = await callClaude(REMINDER_SYS, `שם הלקוח: ${b.name}\nמועד התור: ${b.slot}`);
+        textarea.value = text || `היי ${b.name}, מזכירה שקבענו תור ל-${b.slot}. מחכה לך! אם צריך לשנות, תכתוב/י כאן 🙂`;
+        draftBox.style.display = 'block';
+        sendWa.href = waLink(b.phone, textarea.value);
+        textarea.addEventListener('input', ()=> sendWa.href = waLink(b.phone, textarea.value));
+        genBtn.remove();
+      });
+      el.appendChild(card);
+    });
+  }
+
+  // ================= LEADS TAB =================
+  const LEAD_SYS = `את "דנה" מ"דרך הגוף" בבאר שבע, סטודיו טיפולי-תנועתי (שיקום תפקודי, כאבים, פציעות ספורט,
+אימון תנועה מותאם אישית). התפקיד שלך: לכתוב הודעת מעקב קצרה ומשכנעת ללקוח פוטנציאלי שכבר דיבר איתכם
+אך עדיין לא קבע תור. השתמשי בפרטים שנמסרו לך על השיחה הקודמת כדי להתייחס אליהם באופן אישי, לטפל
+בעדינות בהתנגדות אם צוינה, ולהוביל להצעה קונקרטית (למשל: שיחת ייעוץ קצרה או הצעה לתאם תור לשבוע הקרוב).
+עד 4 משפטים, עברית טבעית וחמה, בלי לחץ אגרסיבי, עד אימוג'י אחד. בלי כותרות או חתימה.`;
+
+  async function renderLeads(){
+    const leads = await getLeads();
+    const el = document.getElementById('leadsList');
+    if(leads.length === 0){
+      el.innerHTML = '<div class="empty">אין עדיין לידים. הוסיפו למעלה.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    leads.slice().reverse().forEach((lead) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${lead.name}</div>
+            <div class="meta">${lead.phone}</div>
+          </div>
+          <div class="tagline">ליד פתוח</div>
+        </div>
+        <div class="meta" style="margin-bottom:6px;">${lead.note || ''}</div>
+        <div class="row-actions">
+          <button class="btn btn-primary gen-btn">✍️ נסח הודעת מעקב</button>
+        </div>
+        <div class="draft-box" style="display:none;">
+          <textarea class="draft-text"></textarea>
+          <div class="row-actions">
+            <a class="btn btn-clay send-wa" target="_blank">📲 פתח בוואטסאפ</a>
+          </div>
+        </div>
+      `;
+      const genBtn = card.querySelector('.gen-btn');
+      const draftBox = card.querySelector('.draft-box');
+      const textarea = card.querySelector('.draft-text');
+      const sendWa = card.querySelector('.send-wa');
+      genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        genBtn.innerHTML = 'מנסחת<span class="spinner"></span>';
+        const text = await callClaude(LEAD_SYS, `שם: ${lead.name}\nהערות משיחה קודמת: ${lead.note || 'אין פרטים נוספים'}`);
+        textarea.value = text || `היי ${lead.name}, רציתי לבדוק מה שלומך ואם עדיין רלוונטי לתאם תור אצלנו. אשמח לעזור 🙂`;
+        draftBox.style.display = 'block';
+        sendWa.href = waLink(lead.phone, textarea.value);
+        textarea.addEventListener('input', ()=> sendWa.href = waLink(lead.phone, textarea.value));
+        genBtn.remove();
+      });
+      el.appendChild(card);
+    });
+  }
+
+  document.getElementById('addLeadBtn').addEventListener('click', async () => {
+    const name = document.getElementById('leadName').value.trim();
+    const phone = document.getElementById('leadPhone').value.trim();
+    const note = document.getElementById('leadNote').value.trim();
+    if(!name || !phone) return;
+    const leads = await getLeads();
+    leads.push({ name, phone, note, addedAt: new Date().toISOString() });
+    await saveLeads(leads);
+    document.getElementById('leadName').value = '';
+    document.getElementById('leadPhone').value = '';
+    document.getElementById('leadNote').value = '';
+    renderLeads();
+  });
+
+  // ================= REVIEWS TAB =================
+  const REVIEW_SYS = `את "דנה" מ"דרך הגוף" בבאר שבע, סטודיו טיפולי-תנועתי. כתבי הודעה קצרה וחמה ללקוח שכבר
+עבר טיפול/אימון, ומבקשת ממנו בעדינות להשאיר ביקורת בגוגל. עד 3 משפטים, עברית טבעית, תודה כנה,
+בלי לחץ. אל תכתבי קישור בעצמך — הוא יתווסף אוטומטית בסוף. בלי כותרות או חתימה.`;
+
+  async function renderReviews(){
+    const bookings = await getBookings();
+    const now = new Date();
+    const past = bookings
+      .map(b => ({ ...b, dateObj: parseSlotDate(b.slot) }))
+      .filter(b => b.dateObj && b.dateObj < now)
+      .sort((a,b) => b.dateObj - a.dateObj);
+
+    const el = document.getElementById('reviewsList');
+    if(past.length === 0){
+      el.innerHTML = '<div class="empty">אין עדיין לקוחות עם תור שכבר עבר. הרשימה תתמלא אוטומטית אחרי טיפולים.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    past.forEach((b) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${b.name}</div>
+            <div class="meta">טופל ב-${b.slot} · ${b.phone}</div>
+          </div>
+          <div class="tagline">מועמד/ת לביקורת</div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary gen-btn">✍️ נסח בקשת ביקורת</button>
+        </div>
+        <div class="draft-box" style="display:none;">
+          <textarea class="draft-text"></textarea>
+          <div class="row-actions">
+            <a class="btn btn-clay send-wa" target="_blank">📲 פתח בוואטסאפ</a>
+          </div>
+        </div>
+      `;
+      const genBtn = card.querySelector('.gen-btn');
+      const draftBox = card.querySelector('.draft-box');
+      const textarea = card.querySelector('.draft-text');
+      const sendWa = card.querySelector('.send-wa');
+      genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        genBtn.innerHTML = 'מנסחת<span class="spinner"></span>';
+        const text = await callClaude(REVIEW_SYS, `שם הלקוח: ${b.name}`);
+        const full = (text || `היי ${b.name}, תודה שבחרת ב"דרך הגוף"! נשמח מאוד אם תשאיר/י לנו ביקורת קצרה 🙏`) + `\n${GOOGLE_REVIEW_LINK}`;
+        textarea.value = full;
+        draftBox.style.display = 'block';
+        sendWa.href = waLink(b.phone, textarea.value);
+        textarea.addEventListener('input', ()=> sendWa.href = waLink(b.phone, textarea.value));
+        genBtn.remove();
+      });
+      el.appendChild(card);
+    });
+  }
+
+  renderReminders();
+  renderLeads();
+  renderReviews();
+  renderRetention();
+
+  // ================= RETENTION TAB =================
+  const RETENTION_SYS = `את "דנה" מ"דרך הגוף" בבאר שבע, סטודיו טיפולי-תנועתי. כתבי הודעת "חזרה אלינו" חמה ואישית
+ללקוח שכבר טופל אצלכם בעבר אך לא קבע תור מזה זמן. התייחסי לזמן שעבר בעדינות (בלי להישמע כמו תזכורת אוטומטית),
+הזכירי בקצרה את הערך שהוא קיבל, והציעי לחזור/לתאם תור מחדש. עד 3 משפטים, עברית טבעית וחמה, עד אימוג'י אחד.
+בלי כותרות או חתימה.`;
+
+  function daysSince(dateObj){
+    return Math.floor((new Date() - dateObj) / 86400000);
+  }
+
+  async function renderRetention(){
+    const bookings = await getBookings();
+    const now = new Date();
+    // group by phone, keep latest booking per client
+    const byPhone = {};
+    bookings.forEach(b => {
+      const d = parseSlotDate(b.slot);
+      if(!d) return;
+      if(!byPhone[b.phone] || d > byPhone[b.phone].dateObj){
+        byPhone[b.phone] = { ...b, dateObj: d };
+      }
+    });
+    const cold = Object.values(byPhone)
+      .filter(b => b.dateObj < now && daysSince(b.dateObj) >= 21)
+      .sort((a,b) => a.dateObj - b.dateObj);
+
+    const el = document.getElementById('retentionList');
+    if(cold.length === 0){
+      el.innerHTML = '<div class="empty">אין כרגע לקוחות "קרים" (21+ יום בלי תור חדש) ברשימה.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    cold.forEach((b) => {
+      const days = daysSince(b.dateObj);
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${b.name}</div>
+            <div class="meta">טיפול אחרון: ${b.slot} · ${b.phone}</div>
+          </div>
+          <div class="tagline">${days} יום ללא חזרה</div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary gen-btn">✍️ נסח הודעת חזרה</button>
+        </div>
+        <div class="draft-box" style="display:none;">
+          <textarea class="draft-text"></textarea>
+          <div class="row-actions">
+            <a class="btn btn-clay send-wa" target="_blank">📲 פתח בוואטסאפ</a>
+          </div>
+        </div>
+      `;
+      const genBtn = card.querySelector('.gen-btn');
+      const draftBox = card.querySelector('.draft-box');
+      const textarea = card.querySelector('.draft-text');
+      const sendWa = card.querySelector('.send-wa');
+      genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        genBtn.innerHTML = 'מנסחת<span class="spinner"></span>';
+        const text = await callClaude(RETENTION_SYS, `שם הלקוח: ${b.name}\nזמן שעבר מאז הטיפול האחרון: כ-${days} יום`);
+        textarea.value = text || `היי ${b.name}, זמן רב לא ראינו אותך! מתי נוח לך שנתאם תור ונמשיך מאיפה שהפסקנו? 🙂`;
+        draftBox.style.display = 'block';
+        sendWa.href = waLink(b.phone, textarea.value);
+        textarea.addEventListener('input', ()=> sendWa.href = waLink(b.phone, textarea.value));
+        genBtn.remove();
+      });
+      el.appendChild(card);
+    });
+  }
+
+  // ================= CONTENT TAB =================
+  const CONTENT_SYS = `את מנהלת התוכן של "דרך הגוף" — סטודיו טיפולי-תנועתי בבאר שבע (שיקום תפקודי, כאבים, פציעות ספורט,
+אימון תנועה מותאם אישית). בהתבסס על נתוני הפעילות שסופקו לך, כתבי 3 רעיונות קצרים לפוסט לאינסטגרם/פייסבוק.
+כל רעיון: כותרת קצרה (שורה אחת) + טקסט פוסט קצר (2-3 משפטים) בעברית חמה ומקצועית, עם קריאה לפעולה עדינה בסוף.
+הפרידי בין הרעיונות בשורה עם "---" בלבד. אל תוסיפי מספור, כותרות כלליות, או הסברים מסביב.`;
+
+  document.getElementById('genContentBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('genContentBtn');
+    const resultEl = document.getElementById('contentResult');
+    btn.disabled = true;
+    btn.innerHTML = 'יוצרת<span class="spinner"></span>';
+    const bookings = await getBookings();
+    const leads = await getLeads();
+    const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
+    const recentBookings = bookings.filter(b => new Date(b.bookedAt) > weekAgo).length;
+    const ctx = `הזמנות שנקבעו השבוע: ${recentBookings}\nלידים פתוחים כרגע: ${leads.length}\nסה"כ הזמנות ביומן: ${bookings.length}`;
+    const text = await callClaude(CONTENT_SYS, ctx);
+    const ideas = (text || '').split('---').map(s=>s.trim()).filter(Boolean);
+    resultEl.innerHTML = '';
+    (ideas.length ? ideas : [text]).forEach((idea) => {
+      const box = document.createElement('div');
+      box.className = 'draft-box';
+      box.style.display = 'block';
+      box.innerHTML = `<textarea class="draft-text">${idea}</textarea>`;
+      resultEl.appendChild(box);
+    });
+    btn.disabled = false;
+    btn.innerHTML = '✍️ צור 3 רעיונות לפוסט';
+  });
+
+  // ================= CONFIRMATION / NO-SHOW RISK TAB =================
+  const CONFIRM_SYS = `את "דנה" מ"דרך הגוף" בבאר שבע. כתבי הודעת אישור הגעה קצרה וברורה לתור שמתקיים בקרוב מאוד
+(תוך יממיים). בקשי מהלקוח לאשר בפירוש שהוא מגיע, בטון חם אך ממוקד. עד 2-3 משפטים, עברית טבעית, עד אימוג'י אחד.
+בלי כותרות או חתימה.`;
+
+  async function renderConfirm(){
+    const bookings = await getBookings();
+    const now = new Date();
+    const soon = new Date(now.getTime() + 48*3600*1000);
+    const risk = bookings
+      .map(b => ({ ...b, dateObj: parseSlotDate(b.slot) }))
+      .filter(b => b.dateObj && b.dateObj > now && b.dateObj <= soon)
+      .sort((a,b) => a.dateObj - b.dateObj);
+
+    const el = document.getElementById('confirmList');
+    if(risk.length === 0){
+      el.innerHTML = '<div class="empty">אין תורים ב-48 השעות הקרובות שדורשים אישור הגעה.</div>';
+      return;
+    }
+    el.innerHTML = '';
+    risk.forEach((b) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="top">
+          <div>
+            <div class="name">${b.name}</div>
+            <div class="meta">${b.slot} · ${b.phone}</div>
+          </div>
+          <div class="tagline">בקרוב</div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary gen-btn">✍️ נסח אישור הגעה</button>
+        </div>
+        <div class="draft-box" style="display:none;">
+          <textarea class="draft-text"></textarea>
+          <div class="row-actions">
+            <a class="btn btn-clay send-wa" target="_blank">📲 פתח בוואטסאפ</a>
+          </div>
+        </div>
+      `;
+      const genBtn = card.querySelector('.gen-btn');
+      const draftBox = card.querySelector('.draft-box');
+      const textarea = card.querySelector('.draft-text');
+      const sendWa = card.querySelector('.send-wa');
+      genBtn.addEventListener('click', async () => {
+        genBtn.disabled = true;
+        genBtn.innerHTML = 'מנסחת<span class="spinner"></span>';
+        const text = await callClaude(CONFIRM_SYS, `שם הלקוח: ${b.name}\nמועד התור: ${b.slot}`);
+        textarea.value = text || `היי ${b.name}, מזכירה שהתור שלך מתקרב — ${b.slot}. תוכל/י לאשר שאתה/את מגיע/ה? 🙂`;
+        draftBox.style.display = 'block';
+        sendWa.href = waLink(b.phone, textarea.value);
+        textarea.addEventListener('input', ()=> sendWa.href = waLink(b.phone, textarea.value));
+        genBtn.remove();
+      });
+      el.appendChild(card);
+    });
+  }
+  renderConfirm();
+
+  // ================= SCHEDULING INSIGHTS TAB =================
+  const DAY_NAMES_HE = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+
+  async function renderSchedule(){
+    const bookings = await getBookings();
+    const el = document.getElementById('scheduleInsights');
+    if(bookings.length === 0){
+      el.innerHTML = '<div class="empty">אין עדיין מספיק הזמנות כדי לזהות דפוסים. הנתונים יצטברו ככל שיקבעו יותר תורים.</div>';
+      return;
+    }
+    const byHour = {};
+    const byDay = {};
+    bookings.forEach(b => {
+      const d = parseSlotDate(b.slot);
+      if(!d) return;
+      const h = d.getHours();
+      byHour[h] = (byHour[h]||0) + 1;
+      byDay[d.getDay()] = (byDay[d.getDay()]||0) + 1;
+    });
+    const maxHour = Math.max(1, ...Object.values(byHour));
+    const maxDay = Math.max(1, ...Object.values(byDay));
+
+    let html = '<div class="chart-block"><h4>לפי שעה</h4>';
+    Object.entries(byHour).sort((a,b)=>a[0]-b[0]).forEach(([h,c])=>{
+      html += `<div class="bar-row"><div class="bar-label">${h}:00</div><div class="bar-track"><div class="bar-fill" style="width:${(c/maxHour)*100}%"></div></div><div class="bar-val">${c}</div></div>`;
+    });
+    html += '</div><div class="chart-block"><h4>לפי יום בשבוע</h4>';
+    Object.entries(byDay).sort((a,b)=>a[0]-b[0]).forEach(([d,c])=>{
+      html += `<div class="bar-row"><div class="bar-label">${DAY_NAMES_HE[d]}</div><div class="bar-track"><div class="bar-fill" style="width:${(c/maxDay)*100}%"></div></div><div class="bar-val">${c}</div></div>`;
+    });
+    html += '</div>';
+
+    const topHour = Object.entries(byHour).sort((a,b)=>b[1]-a[1])[0];
+    const topDay = Object.entries(byDay).sort((a,b)=>b[1]-a[1])[0];
+    html += `<div class="insight-box">💡 השעה העמוסה ביותר: <b>${topHour[0]}:00</b> (${topHour[1]} הזמנות). היום העמוס ביותר: <b>${DAY_NAMES_HE[topDay[0]]}</b>. שווה לבדוק אם כדאי לפתוח עוד סלוטים סביב השעה הזו, ולצמצם סלוטים בשעות שכמעט ולא מוזמנות.</div>`;
+
+    el.innerHTML = html;
+  }
+  renderSchedule();
+
+  // ================= WEEKLY REPORT TAB =================
+  const REPORT_SYS = `את מנהלת התפעול של "דרך הגוף" — סטודיו טיפולי-תנועתי בבאר שבע. בהתבסס על הנתונים האמיתיים
+שסופקו לך, כתבי דוח שבועי קצר וברור לבעל העסק: 3-5 שורות, עברית עסקית וישירה, ללא פאתוס. ציינו את המספרים החשובים,
+ותנו נקודה מעשית אחת לשיפור אם רלוונטי (למשל: שעה עמוסה שכדאי להרחיב, או לקוחות שדורשים תשומת לב). אל תמציאי
+נתונים שלא סופקו.`;
+
+  document.getElementById('genReportBtn').addEventListener('click', async () => {
+    const btn = document.getElementById('genReportBtn');
+    const resultEl = document.getElementById('reportResult');
+    btn.disabled = true;
+    btn.innerHTML = 'מכינה<span class="spinner"></span>';
+    const bookings = await getBookings();
+    const leads = await getLeads();
+    const now = new Date();
+    const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate()-7);
+    const newThisWeek = bookings.filter(b => new Date(b.bookedAt) > weekAgo).length;
+    const upcoming = bookings.filter(b => { const d = parseSlotDate(b.slot); return d && d > now; }).length;
+    const past = bookings.filter(b => { const d = parseSlotDate(b.slot); return d && d <= now; }).length;
+    const ctx = `הזמנות חדשות השבוע: ${newThisWeek}\nתורים עתידיים ביומן: ${upcoming}\nלקוחות שכבר טופלו: ${past}\nלידים פתוחים במעקב: ${leads.length}\nסה"כ הזמנות שנרשמו אי-פעם: ${bookings.length}`;
+    const text = await callClaude(REPORT_SYS, ctx);
+    resultEl.innerHTML = `<div class="insight-box" style="margin-top:12px; white-space:pre-wrap;">${text || 'לא הצלחתי להפיק דוח כרגע.'}</div>`;
+    btn.disabled = false;
+    btn.innerHTML = '📊 צור דוח שבועי';
+  });
+})();
+</script>
+
+</body>
+</html>
